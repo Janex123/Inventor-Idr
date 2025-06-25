@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Inventory Tracker with Barcode Scanner</title>
+  <title>Inventory Tracker with Google Sheets Sync</title>
   <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
   <style>
     body {
@@ -64,7 +64,7 @@
   </style>
 </head>
 <body>
-  <h1>📦 Inventory Tracker (with Barcode Scanner)</h1>
+  <h1>📦 Inventory Tracker</h1>
 
   <form id="inventory-form">
     <input type="text" id="item-name" placeholder="Item Name" required />
@@ -150,6 +150,7 @@
       "Others"
     ];
 
+    const scriptURL = https://docs.google.com/spreadsheets/d/1h7PhPB3pKP3OuHQLlha8ipGDPYLEIn6bMlLgqBqxINY/edit?gid=0#gid=0
     let inventory = JSON.parse(localStorage.getItem('inventory')) || [];
 
     function saveInventory() {
@@ -220,10 +221,22 @@
 
       if (!name || qty < 0 || !category || !status) return;
 
-      inventory.push({ name, qty, category, status });
+      const item = { name, qty, category, status };
+      inventory.push(item);
       saveInventory();
       renderInventory();
       form.reset();
+
+      // Send to Google Sheet
+      fetch(scriptURL, {
+        method: "POST",
+        body: JSON.stringify(item),
+        headers: { "Content-Type": "application/json" }
+      }).then(response => {
+        if (!response.ok) {
+          console.error("Failed to send to Google Sheet.");
+        }
+      }).catch(err => console.error("Error:", err));
     });
 
     search.addEventListener('input', renderInventory);
