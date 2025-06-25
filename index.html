@@ -238,13 +238,15 @@
         { facingMode: "environment" },
         { fps: 10, qrbox: 250 },
         (decodedText, decodedResult) => {
-          // Expected format: OXM-001|1
           const parts = decodedText.split(/[\|,]/);
           const scannedName = parts[0]?.trim() || "";
-          const scannedQty = parts[1]?.trim() || "";
+          const scannedQty = parseInt(parts[1]?.trim() || "0");
 
-          document.getElementById("item-name").value = scannedName;
-          document.getElementById("item-qty").value = scannedQty;
+          const nameInput = document.getElementById("item-name");
+          const qtyInput = document.getElementById("item-qty");
+
+          nameInput.value = scannedName;
+          qtyInput.value = isNaN(scannedQty) ? "" : scannedQty;
 
           html5QrCode.stop().then(() => {
             scannerDiv.innerHTML = "";
@@ -252,7 +254,7 @@
           });
         },
         (errorMessage) => {
-          // Ignore scanning errors
+          // silent fail
         }
       ).catch(err => {
         console.error("QR Scanner error", err);
